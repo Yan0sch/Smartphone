@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 
 namespace _2._4
 {
@@ -7,6 +8,7 @@ namespace _2._4
     {
         static void Main(string[] args)
         {
+            int counter = 0;
             Smartphone s = new Smartphone();
             while (true)
             {
@@ -15,7 +17,11 @@ namespace _2._4
                     Console.WriteLine("Smartphone is locked!");
                     Console.Write("Please Enter a pin: ");
                     byte[] pin = ASCIIEncoding.ASCII.GetBytes(Console.ReadLine());
-                    s.unlock_phone(pin);
+                    if(!s.unlock_phone(pin)) counter++;
+                    if(counter >= 3){ 
+                        Console.WriteLine("Smartphone is locked. Try again in 5 s.");
+                        Thread.Sleep(5000);
+                    }
                 }
                 else
                 {
