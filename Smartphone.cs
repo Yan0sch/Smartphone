@@ -8,9 +8,11 @@ namespace _2._4
 {
     class Smartphone
     {
-        public bool locked {get; private set;} = true;
+        public bool locked { get; private set; } = true;
         string path = @"pin";
         byte[] pin_hash = null;
+
+        int lock_time = 5000;
 
         int counter = 0;
         public Smartphone()
@@ -37,13 +39,17 @@ namespace _2._4
         public bool unlock_phone(byte[] pin)
         {
             byte[] new_hash = new SHA256Managed().ComputeHash(pin);
-            for(int i = 0; i < pin_hash.Length;i++){
-                if(pin_hash[i] != new_hash[i]){
+            for (int i = 0; i < pin_hash.Length; i++)
+            {
+                if (pin_hash[i] != new_hash[i])
+                {
                     counter++;
-                    if(counter >= 3){ 
+                    if (counter >= 3)
+                    {
                         counter = 0;
-                        Console.WriteLine("Smartphone is locked. Try again in 5 s.");
-                        Thread.Sleep(5000);
+                        Console.WriteLine("Smartphone is locked. Try again in {0} s.", lock_time / 1000);
+                        Thread.Sleep(lock_time);
+                        lock_time *= 2;
                     }
                     return false;
                 }
@@ -52,7 +58,8 @@ namespace _2._4
             return true;
         }
 
-        public void lock_phone() {
+        public void lock_phone()
+        {
             locked = true;
         }
     }
