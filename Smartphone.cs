@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace _2._4
 {
@@ -10,9 +11,10 @@ namespace _2._4
         public bool locked {get; private set;} = true;
         string path = @"pin";
         byte[] pin_hash = null;
+
+        int counter = 0;
         public Smartphone()
         {
-
             if (File.Exists(path))
             {
                 pin_hash = File.ReadAllBytes(path);
@@ -27,18 +29,24 @@ namespace _2._4
         {
             Console.Write("Enter new pin: ");
             byte[] pin = ASCIIEncoding.ASCII.GetBytes(Console.ReadLine());
-            pin_hash = new SHA256Managed().ComputeHash(salt + pin);
+            pin_hash = new SHA256Managed().ComputeHash(pin);
             File.WriteAllBytes(path, pin_hash);
             Console.WriteLine("\nnew pin created!");
-            Console.WriteLine("pin: {0}, hash: {1}", ASCIIEncoding.ASCII.GetString(pin), ASCIIEncoding.UTF8.GetString(pin_hash));
         }
 
         public bool unlock_phone(byte[] pin)
         {
             byte[] new_hash = new SHA256Managed().ComputeHash(pin);
-            Console.WriteLine("{0}", ASCIIEncoding.UTF8.GetString(new_hash));
             for(int i = 0; i < pin_hash.Length;i++){
-                if(pin_hash[i] != new_hash[i]) return false;
+                if(pin_hash[i] != new_hash[i]){
+                    counter++;
+                    if(counter >= 3){ 
+                        counter = 0;
+                        Console.WriteLine("Smartphone is locked. Try again in 5 s.");
+                        Thread.Sleep(5000);
+                    }
+                    return false;
+                }
             }
             locked = false;
             return true;
